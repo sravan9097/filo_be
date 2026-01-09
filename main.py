@@ -20,8 +20,8 @@ openai_service = OpenAIService()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown events."""
-        logger.info("Starting GST CA Copilot Backend...")
-        logger.info(f"Using OpenAI model: {settings.main_model}")
+    logger.info("Starting GST CA Copilot Backend...")
+    logger.info(f"Using OpenAI model: {settings.main_model}")
     yield
     logger.info("Shutting down GST CA Copilot Backend...")
 
