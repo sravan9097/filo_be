@@ -115,6 +115,23 @@ class SupabaseService:
             return response.data is not None
         except Exception as e:
             raise Exception(f"Error creating conversation: {str(e)}")
+    
+    def get_user_conversations(self, user_id: str) -> List[Dict[str, Any]]:
+        """
+        Fetch all conversations for a user.
+        
+        Args:
+            user_id: UUID of the user
+            
+        Returns:
+            List of conversation records, ordered by updated_at descending
+        """
+        try:
+            response = self.client.table("conversations").select("*").eq("user_id", user_id).order("updated_at", desc=True).execute()
+            
+            return response.data if response.data else []
+        except Exception as e:
+            raise Exception(f"Error fetching user conversations: {str(e)}")
 
 
 # Global service instance

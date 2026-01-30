@@ -53,6 +53,75 @@ async def root():
     }
 
 
+@app.get("/chats/{conversation_id}")
+async def get_chat(conversation_id: str):
+    """
+    Fetch a specific conversation by ID.
+    
+    Args:
+        conversation_id: UUID of the conversation
+        
+    Returns:
+        Conversation record with messages
+    """
+    try:
+        logger.info(f"Fetching conversation: {conversation_id}")
+        conversation = supabase_service.get_conversation(conversation_id)
+        
+        if not conversation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Conversation {conversation_id} not found"
+            )
+        
+        return conversation
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching conversation: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+
+@app.get("/chats")
+async def list_chats(user_id: str):
+    """
+    List all conversations for a user.
+    
+    Args:
+        user_id: UUID of the user (query parameter)
+        
+    Returns:
+        List of conversation records, ordered by most recent first
+    """
+    try:
+        if not user_id or not user_id.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="user_id query parameter is required"
+            )
+        
+        logger.info(f"Fetching conversations for user: {user_id}")
+        conversations = supabase_service.get_user_conversations(user_id)
+        
+        return {
+            "conversations": conversations,
+            "count": len(conversations)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching user conversations: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """
