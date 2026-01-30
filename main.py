@@ -67,26 +67,22 @@ async def get_chat(conversation_id: str):
     Returns:
         Conversation record with messages
     """
-    logger.info(f"[DEBUG] GET /chats/{{id}} endpoint hit - conversation_id: {conversation_id}")
     try:
         logger.info(f"Fetching conversation: {conversation_id}")
         conversation = supabase_service.get_conversation(conversation_id)
-        logger.info(f"[DEBUG] Supabase query result - is_none: {conversation is None}, conversation: {conversation}")
         
         if not conversation:
-            logger.info(f"[DEBUG] 404 - Conversation not found: {conversation_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Conversation {conversation_id} not found"
             )
         
-        logger.info(f"[DEBUG] Returning conversation successfully - has_messages: {bool(conversation.get('messages'))}")
         return conversation
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"[DEBUG] Exception in get_chat - error: {str(e)}, type: {type(e).__name__}", exc_info=True)
+        logger.error(f"Error fetching conversation: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}"
