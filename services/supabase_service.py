@@ -44,23 +44,18 @@ class SupabaseService:
         Returns:
             Conversation record with messages, or None if not found
         """
-        # region agent log
-        import json; import time
-        with open('/Users/sravankumar/Documents/GitHub/filo_be/.cursor/debug.log', 'a') as f: f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C,D","location":"supabase_service.py:37","message":"Querying conversations table","data":{"conversation_id":conversation_id,"supabase_url":settings.supabase_url[:30]+"..."},"timestamp":int(time.time()*1000)})+"\n")
-        # endregion
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"[DEBUG] Querying conversations table - conversation_id: {conversation_id}, supabase_url: {settings.supabase_url[:30]}...")
         try:
             response = self.client.table("conversations").select("*").eq("id", conversation_id).execute()
-            # region agent log
-            with open('/Users/sravankumar/Documents/GitHub/filo_be/.cursor/debug.log', 'a') as f: f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C,D","location":"supabase_service.py:48","message":"Supabase response","data":{"has_data":bool(response.data),"data_length":len(response.data) if response.data else 0,"response_status":"success"},"timestamp":int(time.time()*1000)})+"\n")
-            # endregion
+            logger.info(f"[DEBUG] Supabase response - has_data: {bool(response.data)}, data_length: {len(response.data) if response.data else 0}")
             
             if response.data and len(response.data) > 0:
                 return response.data[0]
             return None
         except Exception as e:
-            # region agent log
-            with open('/Users/sravankumar/Documents/GitHub/filo_be/.cursor/debug.log', 'a') as f: f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"D","location":"supabase_service.py:54","message":"Supabase query exception","data":{"error":str(e),"error_type":type(e).__name__},"timestamp":int(time.time()*1000)})+"\n")
-            # endregion
+            logger.error(f"[DEBUG] Supabase query exception - error: {str(e)}, type: {type(e).__name__}", exc_info=True)
             raise Exception(f"Error fetching conversation: {str(e)}")
     
     def update_conversation_messages(self, conversation_id: str, messages: List[Dict[str, str]]) -> bool:

@@ -64,38 +64,26 @@ async def get_chat(conversation_id: str):
     Returns:
         Conversation record with messages
     """
-    # region agent log
-    import json; import time
-    with open('/Users/sravankumar/Documents/GitHub/filo_be/.cursor/debug.log', 'a') as f: f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"A,B,E","location":"main.py:56","message":"GET /chats/{id} endpoint hit","data":{"conversation_id":conversation_id},"timestamp":int(time.time()*1000)})+"\n")
-    # endregion
+    logger.info(f"[DEBUG] GET /chats/{{id}} endpoint hit - conversation_id: {conversation_id}")
     try:
         logger.info(f"Fetching conversation: {conversation_id}")
         conversation = supabase_service.get_conversation(conversation_id)
-        # region agent log
-        with open('/Users/sravankumar/Documents/GitHub/filo_be/.cursor/debug.log', 'a') as f: f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C,D","location":"main.py:69","message":"Supabase query result","data":{"conversation":conversation,"is_none":conversation is None},"timestamp":int(time.time()*1000)})+"\n")
-        # endregion
+        logger.info(f"[DEBUG] Supabase query result - is_none: {conversation is None}, conversation: {conversation}")
         
         if not conversation:
-            # region agent log
-            with open('/Users/sravankumar/Documents/GitHub/filo_be/.cursor/debug.log', 'a') as f: f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C","location":"main.py:72","message":"404 - Conversation not found","data":{"conversation_id":conversation_id},"timestamp":int(time.time()*1000)})+"\n")
-            # endregion
+            logger.info(f"[DEBUG] 404 - Conversation not found: {conversation_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Conversation {conversation_id} not found"
             )
         
-        # region agent log
-        with open('/Users/sravankumar/Documents/GitHub/filo_be/.cursor/debug.log', 'a') as f: f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"A,E","location":"main.py:77","message":"Returning conversation successfully","data":{"has_messages":bool(conversation.get("messages"))},"timestamp":int(time.time()*1000)})+"\n")
-        # endregion
+        logger.info(f"[DEBUG] Returning conversation successfully - has_messages: {bool(conversation.get('messages'))}")
         return conversation
         
     except HTTPException:
         raise
     except Exception as e:
-        # region agent log
-        with open('/Users/sravankumar/Documents/GitHub/filo_be/.cursor/debug.log', 'a') as f: f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"D,E","location":"main.py:82","message":"Exception in get_chat","data":{"error":str(e),"error_type":type(e).__name__},"timestamp":int(time.time()*1000)})+"\n")
-        # endregion
-        logger.error(f"Error fetching conversation: {str(e)}", exc_info=True)
+        logger.error(f"[DEBUG] Exception in get_chat - error: {str(e)}, type: {type(e).__name__}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}"
