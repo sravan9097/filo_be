@@ -1,5 +1,5 @@
 """Main FastAPI application for GST CA Copilot backend."""
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
@@ -42,6 +42,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Create API router with /api prefix
+api_router = APIRouter(prefix="/api")
+
 
 @app.get("/")
 async def root():
@@ -53,7 +56,7 @@ async def root():
     }
 
 
-@app.get("/chats/{conversation_id}")
+@api_router.get("/chats/{conversation_id}")
 async def get_chat(conversation_id: str):
     """
     Fetch a specific conversation by ID.
@@ -90,7 +93,7 @@ async def get_chat(conversation_id: str):
         )
 
 
-@app.get("/chats")
+@api_router.get("/chats")
 async def list_chats(user_id: str):
     """
     List all conversations for a user.
@@ -126,7 +129,7 @@ async def list_chats(user_id: str):
         )
 
 
-@app.post("/chat", response_model=ChatResponse)
+@api_router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """
     Main chat endpoint for GST CA Copilot.
@@ -232,6 +235,10 @@ async def chat(request: ChatRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}"
         )
+
+
+# Include the API router with /api prefix
+app.include_router(api_router)
 
 
 if __name__ == "__main__":
