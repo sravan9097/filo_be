@@ -12,12 +12,12 @@ class Settings(BaseSettings):
     supabase_url: Optional[str] = None
     supabase_key: Optional[str] = None
     
-    # OpenAI configuration
-    openai_api_key: Optional[str] = None
+    # AI configuration (Gemini)
+    gemini_api_key: Optional[str] = None
     
-    # OpenAI model configuration
-    summarize_model: str = "gpt-4o-mini"  # Cheap model for conversation summarization (fast and cost-effective)
-    main_model: str = "gpt-4o"  # Main model for GST reasoning (most capable)
+    # AI model configuration
+    summarize_model: str = "gemini-2.5-flash"  # Fast model for conversation summarization
+    main_model: str = "gemini-2.5-flash"  # Main model for GST reasoning (fast and free tier friendly)
     
     # Conversation summarization configuration
     summarize_threshold: int = 10  # Summarize if conversation has more than this many messages
@@ -40,8 +40,8 @@ class Settings(BaseSettings):
             missing.append("SUPABASE_URL")
         if not self.supabase_key:
             missing.append("SUPABASE_KEY")
-        if not self.openai_api_key:
-            missing.append("OPENAI_API_KEY")
+        if not self.gemini_api_key:
+            missing.append("GEMINI_API_KEY")
         
         if missing:
             env_local = Path(".env.local")
@@ -63,7 +63,7 @@ class Settings(BaseSettings):
             error_msg += f"Required variables:\n"
             error_msg += f"  - SUPABASE_URL=your_supabase_project_url\n"
             error_msg += f"  - SUPABASE_KEY=your_supabase_anon_key\n"
-            error_msg += f"  - OPENAI_API_KEY=your_openai_api_key\n"
+            error_msg += f"  - GEMINI_API_KEY=your_gemini_api_key\n"
             
             raise ValueError(error_msg)
 
